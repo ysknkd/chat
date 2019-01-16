@@ -1,8 +1,78 @@
 <html>
 <head>
     <title>Chat</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+        input {
+            display: block;
+        }
+        #messages {
+            margin: 0;
+            padding: 0;
+        }
+        .chatbox-container {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+
+            padding: 8px;
+
+            background: #eee;
+        }
+        .textarea {
+            margin-bottom: 4px;
+            width: 100%;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    Let's Chat.
+    <ul id="messages"></ul>
+
+    <div class="chatbox-container">
+        <form id="chatbox">
+            <textarea class="textarea"></textarea>
+            <input type="submit" value="submit" />
+        </form>
+    </div>
+
+    <script>
+        (function () {
+            let msgbox = document.querySelector('#chatbox textarea')
+            let messages = document.getElementById('messages')
+
+            document.getElementById('chatbox')
+                .addEventListener('submit', (e) => {
+                    e.preventDefault()
+
+                    if (!msgbox.value) {
+                        return
+                    }
+                    if (!socket) {
+                        alert('error: Not connected to the server with websocket')
+                        return
+                    }
+                    socket.send(msgbox.value)
+                    msgbox.value = ''
+
+                    return
+                })
+                
+            let socket = new WebSocket('ws://localhost:8080/room')
+            socket.onclose = () => {
+                alert('Disconnected')
+            }
+            socket.onmessage = (e) => {
+                const li = document.createElement('li')
+                li.className = 'message'
+                li.textContent = e.data
+
+                messages.appendChild(li)
+            }
+        })()
+    </script>
 </body>
 </html>
